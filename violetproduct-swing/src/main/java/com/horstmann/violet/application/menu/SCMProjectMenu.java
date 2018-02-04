@@ -77,16 +77,7 @@ public class SCMProjectMenu extends JMenu
         {
             public void actionPerformed(ActionEvent e)
             {
-            	 if (isThereAnyWorkspaceDisplayed()) {
-	                    IEditorPart activeEditorPart = getActiveEditorPart();
-	                    IEditorPartBehaviorManager behaviorManager = activeEditorPart.getBehaviorManager();
-	                    List<CheckAssociationAndCompositionOnOneClassBehavior> found = behaviorManager.getBehaviors(CheckAssociationAndCompositionOnOneClassBehavior.class);
-	                    if (found.size() != 1) {
-	                        return;
-	                    }
-	                    String errorMessage=found.get(0).checkAssociationAndCompositionOnOneClassBehavior();
-	                    JOptionPane.showMessageDialog(null,errorMessage );
-	                }
+            	HelpManager.getInstance().openHomepage();
             }
 
         });
