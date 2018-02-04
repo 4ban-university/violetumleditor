@@ -241,12 +241,24 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
               for (Entry<Id, Map<String,Id>> entry : graphNodes.entrySet()) {
             	    Id key = entry.getKey();
             	    Map<String,Id> nodeIds = entry.getValue();
-            	    if (graph.findEdge(key)!=null) {
+            	    if(newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.AggregationEdge")
+                            ||newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.CompositionEdge")) {
+                                //if(!startNode.getGraph().getAllEdges().isEmpty()) {
+                                    if(startNode.equals(endNode)) {
+                                        this.dialogFactory.showWarningDialog(no_MutipleCompositionAggregationononeclass_message);
+                                        return false;
+                                    }
+                                //}   
+                            }
+            	    if(!startNode.equals(endNode))
+            	    {if (graph.findEdge(key)!=null) {
             	    	if(nodeIds.get("startNode").equals(endNode.getId()) && nodeIds.get("endNode").equals(startNode.getId())) {
             	    		this.dialogFactory.showWarningDialog(noBidirectional);
                          	return false;
                     	 }
             	    }
+            	    }
+            	    
                 	
                 }
                 
@@ -356,6 +368,8 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
     
     @ResourceBundleBean(key = "addedge.properties.no_bidirectional_message")
     private String noBidirectional;
-
+    
+    @ResourceBundleBean(key = "addedge.properties.no_MutipleCompositionAggregationononeclass_message")
+    private String no_MutipleCompositionAggregationononeclass_message;
 
 }

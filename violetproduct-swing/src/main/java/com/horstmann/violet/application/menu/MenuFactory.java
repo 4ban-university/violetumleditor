@@ -72,6 +72,19 @@ public class MenuFactory
         }
         return this.helpMenu;
     }
+    
+    /**
+     * @param editorFrame
+     * @return SCMProject menu
+     */
+    public SCMProjectMenu getSCMProjectMenu(MainFrame editorFrame)
+    {
+        if (this.scmprojectMenu == null)
+        {
+            this.scmprojectMenu = new SCMProjectMenu(editorFrame);
+        }
+        return this.scmprojectMenu;
+    }
 
     /**
      * @param editorFrame
@@ -102,6 +115,7 @@ public class MenuFactory
     private EditMenu editMenu;
     private FileMenu fileMenu;
     private HelpMenu helpMenu;
+    private SCMProjectMenu scmprojectMenu;
     private ViewMenu viewMenu;
     private DocumentMenu documentMenu;
 
