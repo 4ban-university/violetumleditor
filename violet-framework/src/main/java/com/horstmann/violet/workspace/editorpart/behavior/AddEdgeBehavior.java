@@ -37,9 +37,9 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
 
     public AddEdgeBehavior(IEditorPart editorPart, IGraphToolsBar graphToolsBar)
     {
-    	BeanInjector.getInjector().inject(this);
+        BeanInjector.getInjector().inject(this);
         ResourceBundleInjector.getInjector().inject(this);
-    	this.editorPart = editorPart;
+        this.editorPart = editorPart;
         this.graph = editorPart.getGraph();
         this.grid = editorPart.getGraph().getGridSticker();
         this.selectionHandler = editorPart.getSelectionHandler();
@@ -103,7 +103,7 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
         {
             return;
         }
-        if (this.isLinkingInProgress)	
+        if (this.isLinkingInProgress)   
         {
             endAction(event);
             return;
@@ -239,9 +239,10 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
                     relativeEndPoint = new Point2D.Double(relativeEndX, relativeEndY);
                 }
               for (Entry<Id, Map<String,Id>> entry : graphNodes.entrySet()) {
-            	    Id key = entry.getKey();
-            	    Map<String,Id> nodeIds = entry.getValue();
-            	    if(newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.AggregationEdge")
+                    Id key = entry.getKey();
+                    Map<String,Id> nodeIds = entry.getValue();
+                    if(editorPart.isFeature1()) {
+                    if(newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.AggregationEdge")
                             ||newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.CompositionEdge")) {
                                 //if(!startNode.getGraph().getAllEdges().isEmpty()) {
                                     if(startNode.equals(endNode)) {
@@ -249,28 +250,28 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
                                         return false;
                                     }
                                 //}   
-                            }
-            	    if(!startNode.equals(endNode))
-            	    {if (graph.findEdge(key)!=null) {
-            	    	if(nodeIds.get("startNode").equals(endNode.getId()) && nodeIds.get("endNode").equals(startNode.getId())) {
-            	    		this.dialogFactory.showWarningDialog(noBidirectional);
-                         	return false;
-                    	 }
-            	    }
-            	    }
-            	    
-                	
+                            }}
+                    if(!startNode.equals(endNode))
+                    {if (graph.findEdge(key)!=null) {
+                        if(nodeIds.get("startNode").equals(endNode.getId()) && nodeIds.get("endNode").equals(startNode.getId())) {
+                            this.dialogFactory.showWarningDialog(noBidirectional);
+                            return false;
+                         }
+                    }
+                    }
+                    
+                    
                 }
                 
                 if (graph.connect(newEdge, startNode, relativeStartPoint, endNode, relativeEndPoint, transitionPointsAsArray))
                 {
-                	Id id=newEdge.getId();
-                	Id startId = startNode.getId();
-                	Id endId = endNode.getId();
-                	Map<String,Id>nodeInfo= new HashMap<String,Id>();
-                	nodeInfo.put("startNode", startId);
-                	nodeInfo.put("endNode", endId);
-                	graphNodes.put(id, nodeInfo);
+                    Id id=newEdge.getId();
+                    Id startId = startNode.getId();
+                    Id endId = endNode.getId();
+                    Map<String,Id>nodeInfo= new HashMap<String,Id>();
+                    nodeInfo.put("startNode", startId);
+                    nodeInfo.put("endNode", endId);
+                    graphNodes.put(id, nodeInfo);
                     newEdge.incrementRevision();
                     isAdded = true;
                 }
@@ -303,32 +304,32 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
         g2.setColor(oldColor);
     }
     
-	@Override
-	public void onMouseToolClicked(GraphTool selectedTool)
-	{
-		Object obj = selectedTool.getNodeOrEdge();
-		if (obj instanceof IEdge)
-		{
-			this.dragging = true;
-		}
-	}
+    @Override
+    public void onMouseToolClicked(GraphTool selectedTool)
+    {
+        Object obj = selectedTool.getNodeOrEdge();
+        if (obj instanceof IEdge)
+        {
+            this.dragging = true;
+        }
+    }
 
-	@Override
-	public void onMouseToolDragged(MouseEvent event)
-	{
-		if (this.dragging) {
-			this.dialogFactory.showWarningDialog(noDragMessage);
-			this.dragging = false;
-		}
-	}
+    @Override
+    public void onMouseToolDragged(MouseEvent event)
+    {
+        if (this.dragging) {
+            this.dialogFactory.showWarningDialog(noDragMessage);
+            this.dragging = false;
+        }
+    }
 
-	@Override
-	public void onMouseToolReleased(MouseEvent event)
-	{
-		this.dragging = false;
-	}
-	
-	
+    @Override
+    public void onMouseToolReleased(MouseEvent event)
+    {
+        this.dragging = false;
+    }
+    
+    
 
     private static final Color PURPLE = new Color(0.7f, 0.4f, 0.7f);
 
@@ -359,6 +360,8 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
     private IEdge newEdge = null;
     
     private boolean dragging;
+    
+    
     
     @InjectedBean
     private DialogFactory dialogFactory;

@@ -297,6 +297,29 @@ public class EditorPart extends JPanel implements IEditorPart
     private int lastWidth = 0;
     
     private int lastHeight = 0;
+    
+    private boolean feature1;
+    public boolean isFeature1() {
+		return feature1;
+	}
+
+	public void setFeature1(boolean feature1) {
+		this.feature1 = feature1;
+	}
+
+	public boolean isFeature2() {
+		return feature2;
+	}
+
+	public void setFeature2(boolean feature2) {
+		this.feature2 = feature2;
+	}
+
+
+
+
+
+	private boolean feature2;
 
     /**
      * Scale factor used to grow drawing area
