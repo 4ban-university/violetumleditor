@@ -92,6 +92,14 @@ public interface IEditorPart
      */
     public IEditorPartBehaviorManager getBehaviorManager();
     
-   
+    
+    public boolean isFeature1() ;
+
+    public void setFeature1(boolean feature1);
+
+    public boolean isFeature2();
+
+    public void setFeature2(boolean feature2);
+    
 
 }

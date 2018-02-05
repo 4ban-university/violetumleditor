@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.ErrorManager;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -40,6 +41,7 @@ import com.horstmann.violet.framework.injection.resources.annotation.ResourceBun
 import com.horstmann.violet.workspace.IWorkspace;
 import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
+import com.horstmann.violet.workspace.editorpart.behavior.CheckAssociationAndCompositionOnOneClassBehavior;
 import com.horstmann.violet.workspace.editorpart.behavior.UndoRedoCompoundBehavior;
 
 /**
@@ -72,11 +74,15 @@ public class SCMProjectMenu extends JMenu
     private void createMenu()
     {
 
-    	Feature1Item.addActionListener(new ActionListener()
+        Feature1Item.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
-            	HelpManager.getInstance().openHomepage();
+                IWorkspace activeWorkspace = mainFrame.getActiveWorkspace();
+                IEditorPart activeEditor = activeWorkspace.getEditorPart();
+                activeEditor.setFeature1(Feature1Item.isSelected());
+                
+                
             }
 
         });
@@ -121,7 +127,7 @@ public class SCMProjectMenu extends JMenu
     private MainFrame mainFrame;
     
     @ResourceBundleBean(key = "SCMProject.Feature1")
-    private JMenuItem Feature1Item;
+    private JCheckBoxMenuItem Feature1Item;
     
     @ResourceBundleBean(key = "SCMProject.Feature2")
     private JMenuItem Feature2Item;
