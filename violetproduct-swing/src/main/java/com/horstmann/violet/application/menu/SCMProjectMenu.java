@@ -91,7 +91,9 @@ public class SCMProjectMenu extends JMenu
         {
             public void actionPerformed(ActionEvent e)
             {
-                HelpManager.getInstance().openHomepage();
+                IWorkspace activeWorkspace = mainFrame.getActiveWorkspace();
+                IEditorPart activeEditor = activeWorkspace.getEditorPart();
+                activeEditor.setFeature2(Feature1Item.isSelected());
             }
 
         });
@@ -129,7 +131,7 @@ public class SCMProjectMenu extends JMenu
     private JCheckBoxMenuItem Feature1Item;
     
     @ResourceBundleBean(key = "SCMProject.Feature2")
-    private JMenuItem Feature2Item;
+    private JCheckBoxMenuItem Feature2Item;
     
     @ResourceBundleBean(key = "SCMProject.Feature3")
     private JMenuItem Feature3Item;

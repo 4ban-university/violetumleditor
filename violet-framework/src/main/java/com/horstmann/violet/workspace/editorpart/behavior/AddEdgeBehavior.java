@@ -1,378 +1,142 @@
-package com.horstmann.violet.workspace.editorpart.behavior;
+/*
+ Violet - A program for editing UML diagrams.
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.HashMap;
+ Copyright (C) 2007 Cay S. Horstmann (http://horstmann.com)
+ Alexandre de Pellegrin (http://alexdp.free.fr);
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+package com.horstmann.violet.application.menu;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.logging.ErrorManager;
 
-import javax.swing.SwingUtilities;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
-import com.horstmann.violet.framework.dialog.DialogFactory;
-import com.horstmann.violet.framework.injection.bean.ManiocFramework.BeanInjector;
-import com.horstmann.violet.framework.injection.bean.ManiocFramework.InjectedBean;
+import com.horstmann.violet.application.gui.MainFrame;
+import com.horstmann.violet.application.help.AboutDialog;
+import com.horstmann.violet.application.help.HelpManager;
+import com.horstmann.violet.application.help.ShortcutDialog;
 import com.horstmann.violet.framework.injection.resources.ResourceBundleInjector;
 import com.horstmann.violet.framework.injection.resources.annotation.ResourceBundleBean;
-import com.horstmann.violet.product.diagram.abstracts.IGraph;
-import com.horstmann.violet.product.diagram.abstracts.IGridSticker;
-import com.horstmann.violet.product.diagram.abstracts.Id;
-import com.horstmann.violet.product.diagram.abstracts.edge.IEdge;
-import com.horstmann.violet.product.diagram.abstracts.node.INode;
-import com.horstmann.violet.product.diagram.common.node.PointNode;
+import com.horstmann.violet.workspace.IWorkspace;
 import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
-import com.horstmann.violet.workspace.editorpart.IEditorPartSelectionHandler;
-import com.horstmann.violet.workspace.sidebar.graphtools.GraphTool;
-import com.horstmann.violet.workspace.sidebar.graphtools.IGraphToolsBar;
-import com.horstmann.violet.workspace.sidebar.graphtools.IGraphToolsBarMouseListener;
+import com.horstmann.violet.workspace.editorpart.behavior.UndoRedoCompoundBehavior;
 
-public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGraphToolsBarMouseListener
+/**
+ * Help menu
+ * 
+ * @author Alexandre de Pellegrin
+ * 
+ */
+@ResourceBundleBean(resourceReference = MenuFactory.class)
+public class SCMProjectMenu extends JMenu
 {
 
-    public AddEdgeBehavior(IEditorPart editorPart, IGraphToolsBar graphToolsBar)
+    /**
+     * Default constructor
+     * 
+     * @param mainFrame where this menu is atatched
+     * @param factory to access to external resources such as texts, icons
+     */
+    @ResourceBundleBean(key = "SCMProject")
+    public SCMProjectMenu(MainFrame mainFrame)
     {
-        BeanInjector.getInjector().inject(this);
         ResourceBundleInjector.getInjector().inject(this);
-        this.editorPart = editorPart;
-        this.graph = editorPart.getGraph();
-        this.grid = editorPart.getGraph().getGridSticker();
-        this.selectionHandler = editorPart.getSelectionHandler();
-        this.behaviorManager = editorPart.getBehaviorManager();
-        this.graphToolsBar = graphToolsBar;
-        this.dragging = false;
-        graphToolsBar.addMouseListener(this);
-    }
-  private Map<Id,Map<String,Id>> graphNodes = new HashMap<Id,Map<String,Id>>();
-    @Override
-    public void onMousePressed(MouseEvent event)
-    {
-        if (!isConditionOK(event))
-        {
-            cancel();
-            return;
-        }
-        if (!this.isLinkingInProgress)
-        {
-            startAction(event);
-            return;
-        }
-        if (this.isLinkingInProgress && this.isLinkBySeparatedClicks)
-        {
-            if (isRecognizedAsTransitionAction())
-            {
-                transitionAction(event);
-                return;
-            }
-            endAction(event);
-            return;
-        }
-    }
-
-    @Override
-    public void onMouseDragged(MouseEvent event)
-    {
-        if (!this.isLinkingInProgress)
-        {
-            return;
-        }
-        repaintOnMouseMoved(event);
-    }
-
-    @Override
-    public void onMouseMoved(MouseEvent event)
-    {
-        if (!this.isLinkingInProgress)
-        {
-            return;
-        }
-        this.isLinkBySeparatedClicks = true;
-        repaintOnMouseMoved(event);
-    }
-
-    @Override
-    public void onMouseReleased(MouseEvent event)
-    {
-        this.editorPart.getSwingComponent().invalidate();
-        if (this.isLinkBySeparatedClicks)
-        {
-            return;
-        }
-        if (this.isLinkingInProgress)   
-        {
-            endAction(event);
-            return;
-        }
-    }
-
-    private void repaintOnMouseMoved(MouseEvent event)
-    {
-        double zoom = this.editorPart.getZoomFactor();
-        Point2D mousePoint = new Point2D.Double(event.getX() / zoom, event.getY() / zoom);
-        Point2D snappedMousePoint = grid.snap(mousePoint);
-        if (!snappedMousePoint.equals(lastMousePoint)) {
-            this.editorPart.getSwingComponent().invalidate();
-            this.editorPart.getSwingComponent().repaint();
-        }
-        this.lastMousePoint = snappedMousePoint;
-    }
-
-    private boolean isConditionOK(MouseEvent event)
-    {
-        if (event.getClickCount() > 1)
-        {
-            return false;
-        }
-        if (event.getButton() != MouseEvent.BUTTON1)
-        {
-            return false;
-        }
-        if (GraphTool.SELECTION_TOOL.equals(this.graphToolsBar.getSelectedTool()))
-        {
-            return false;
-        }
-        GraphTool selectedTool = this.selectionHandler.getSelectedTool();
-        if (!IEdge.class.isInstance(selectedTool.getNodeOrEdge()))
-        {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isRecognizedAsTransitionAction()
-    {
-        if (this.newEdge == null)
-        {
-            return false;
-        }
-        if (!this.newEdge.isTransitionPointsSupported())
-        {
-            return false;
-        }
-        INode aNode = graph.findNode(this.lastMousePoint);
-        if (aNode == null)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private void startAction(MouseEvent event)
-    {
-        double zoom = editorPart.getZoomFactor();
-        final Point2D mousePoint = new Point2D.Double(event.getX() / zoom, event.getY() / zoom);
-        INode targetNode = graph.findNode(mousePoint);
-        this.isLinkingInProgress = (targetNode != null);
-        this.firstMousePoint = grid.snap(mousePoint);
-        this.lastMousePoint = grid.snap(mousePoint);
-        GraphTool selectedTool = this.selectionHandler.getSelectedTool();
-        IEdge prototype = (IEdge) selectedTool.getNodeOrEdge();
-        this.newEdge = (IEdge) prototype.clone();
-        this.newEdge.setId(new Id());
-    }
-
-    private void transitionAction(MouseEvent event)
-    {
-        this.transitionPoints.add(this.lastMousePoint);
-    }
-
-    private void endAction(MouseEvent event)
-    {
-        boolean added = addEdgeAtPoints(this.newEdge, firstMousePoint, lastMousePoint);
-        if (added)
-        {
-            this.selectionHandler.setSelectedElement(this.newEdge);
-        }
-        this.isLinkingInProgress = false;
-        this.isLinkBySeparatedClicks = false;
-        this.transitionPoints.clear();
-        this.newEdge = null;
-        
-    }
-
-    private void cancel()
-    {
-        this.isLinkingInProgress = false;
-        this.isLinkBySeparatedClicks = false;
-        this.transitionPoints.clear();
-        this.newEdge = null;
+        this.mainFrame = mainFrame;
+        this.createMenu();
     }
 
     /**
-     * Adds an edge at a specific location
-     * 
-     * @param newEdge
-     * @param startPoint
-     * @param endPoint
-     * @return true id the edge has been added
+     * Initializes menu
      */
-    public boolean addEdgeAtPoints(IEdge newEdge, Point2D startPoint, Point2D endPoint)
+    private void createMenu()
     {
-        boolean isAdded = false;
-        if (startPoint.distance(endPoint) > CONNECT_THRESHOLD)
+
+        Feature1Item.addActionListener(new ActionListener()
         {
-            this.behaviorManager.fireBeforeAddingEdgeAtPoints(newEdge, startPoint, endPoint);
-            try
+            public void actionPerformed(ActionEvent e)
             {
-                INode startNode = graph.findNode(startPoint);
-                INode endNode = graph.findNode(endPoint);
-                Point2D relativeStartPoint = null;
-                Point2D relativeEndPoint = null;
-                Point2D[] transitionPointsAsArray = this.transitionPoints.toArray(new Point2D[this.transitionPoints.size()]);
-                if (startNode != null)
-                {
-                    Point2D startNodeLocationOnGraph = startNode.getLocationOnGraph();
-                    double relativeStartX = startPoint.getX() - startNodeLocationOnGraph.getX();
-                    double relativeStartY = startPoint.getY() - startNodeLocationOnGraph.getY();
-                    relativeStartPoint = new Point2D.Double(relativeStartX, relativeStartY);
-                }
-                if (endNode != null)
-                {
-                    Point2D endNodeLocationOnGraph = endNode.getLocationOnGraph();
-                    double relativeEndX = endPoint.getX() - endNodeLocationOnGraph.getX();
-                    double relativeEndY = endPoint.getY() - endNodeLocationOnGraph.getY();
-                    relativeEndPoint = new Point2D.Double(relativeEndX, relativeEndY);
-                }
-              for (Entry<Id, Map<String,Id>> entry : graphNodes.entrySet()) {
-                    Id key = entry.getKey();
-                    Map<String,Id> nodeIds = entry.getValue();
-                    if(editorPart.isFeature1()) {
-                    if(newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.AggregationEdge")
-                            ||newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.CompositionEdge")) {
-                                //if(!startNode.getGraph().getAllEdges().isEmpty()) {
-                                    if(startNode.equals(endNode)) {
-                                        this.dialogFactory.showWarningDialog(no_MutipleCompositionAggregationononeclass_message);
-                                        return false;
-                                    }
-                                //}   
-                            }}
-                    if(!startNode.equals(endNode))
-                    {if (graph.findEdge(key)!=null) {
-                        if(nodeIds.get("startNode").equals(endNode.getId()) && nodeIds.get("endNode").equals(startNode.getId())) {
-                            this.dialogFactory.showWarningDialog(noBidirectional);
-                            return false;
-                         }
-                    }
-                    }
-                    
-                    
-                }
+                IWorkspace activeWorkspace = mainFrame.getActiveWorkspace();
+                IEditorPart activeEditor = activeWorkspace.getEditorPart();
+                activeEditor.setFeature1(Feature1Item.isSelected());
                 
-                if (graph.connect(newEdge, startNode, relativeStartPoint, endNode, relativeEndPoint, transitionPointsAsArray))
-                {
-                    Id id=newEdge.getId();
-                    Id startId = startNode.getId();
-                    Id endId = endNode.getId();
-                    Map<String,Id>nodeInfo= new HashMap<String,Id>();
-                    nodeInfo.put("startNode", startId);
-                    nodeInfo.put("endNode", endId);
-                    graphNodes.put(id, nodeInfo);
-                    newEdge.incrementRevision();
-                    isAdded = true;
-                }
+                
             }
-            finally
+
+        });
+        this.add(Feature1Item);
+
+        Feature2Item.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
             {
-                this.behaviorManager.fireAfterAddingEdgeAtPoints(newEdge, startPoint, endPoint);
+                IWorkspace activeWorkspace = mainFrame.getActiveWorkspace();
+                IEditorPart activeEditor = activeWorkspace.getEditorPart();
+                activeEditor.setFeature2(Feature1Item.isSelected());
             }
-        }
-        return isAdded;
-    }
 
-    @Override
-    public void onPaint(Graphics2D g2)
-    {
-        if (!isLinkingInProgress)
+        });
+        this.add(Feature2Item);
+        
+        Feature3Item.addActionListener(new ActionListener()
         {
-            return;
-        }
-        Color oldColor = g2.getColor();
-        g2.setColor(PURPLE);
-        GeneralPath path = new GeneralPath();
-        path.moveTo(this.firstMousePoint.getX(), this.firstMousePoint.getY());
-        for (Point2D aTransitionPoint : this.transitionPoints)
-        {
-            path.lineTo(aTransitionPoint.getX(), aTransitionPoint.getY());
-        }
-        path.lineTo(this.lastMousePoint.getX(), this.lastMousePoint.getY());
-        g2.draw(path);
-        g2.setColor(oldColor);
+            public void actionPerformed(ActionEvent e)
+            {
+                AboutDialog dialog = new AboutDialog(mainFrame);
+                dialog.setVisible(true);
+            }
+
+        });
+        this.add(Feature3Item);
+
     }
-    
-    @Override
-    public void onMouseToolClicked(GraphTool selectedTool)
+
+    private boolean isThereAnyWorkspaceDisplayed()
     {
-        Object obj = selectedTool.getNodeOrEdge();
-        if (obj instanceof IEdge)
-        {
-            this.dragging = true;
-        }
+        return mainFrame.getWorkspaceList().size() > 0;
     }
-
-    @Override
-    public void onMouseToolDragged(MouseEvent event)
+    
+    private IEditorPart getActiveEditorPart()
     {
-        if (this.dragging) {
-            this.dialogFactory.showWarningDialog(noDragMessage);
-            this.dragging = false;
-        }
+        return this.mainFrame.getActiveWorkspace().getEditorPart();
     }
 
-    @Override
-    public void onMouseToolReleased(MouseEvent event)
-    {
-        this.dragging = false;
-    }
+    /**
+     * Main app frame where this menu is attached to
+     */
+    private MainFrame mainFrame;
     
+    @ResourceBundleBean(key = "SCMProject.Feature1")
+    private JCheckBoxMenuItem Feature1Item;
     
-
-    private static final Color PURPLE = new Color(0.7f, 0.4f, 0.7f);
-
-    private static final int CONNECT_THRESHOLD = 8;
-
-    private Point2D firstMousePoint = null;
-
-    private Point2D lastMousePoint = null;
+    @ResourceBundleBean(key = "SCMProject.Feature2")
+    private JCheckBoxMenuItem Feature2Item;
     
-    private IEditorPart editorPart;
+    @ResourceBundleBean(key = "SCMProject.Feature3")
+    private JMenuItem Feature3Item;
 
-    private IGraph graph;
-    
-    private IGridSticker grid;
 
-    private IEditorPartSelectionHandler selectionHandler;
 
-    private IEditorPartBehaviorManager behaviorManager;
-
-    private IGraphToolsBar graphToolsBar;
-
-    private boolean isLinkingInProgress = false;
-
-    private boolean isLinkBySeparatedClicks = false;
-
-    private List<Point2D> transitionPoints = new ArrayList<Point2D>();
-
-    private IEdge newEdge = null;
-    
-    private boolean dragging;
-    
-    
-    
-    @InjectedBean
-    private DialogFactory dialogFactory;
-    
-    @ResourceBundleBean(key = "addedge.properties.no_drag_message")
-    private String noDragMessage;
-    
-    @ResourceBundleBean(key = "addedge.properties.no_bidirectional_message")
-    private String noBidirectional;
-    
-    @ResourceBundleBean(key = "addedge.properties.no_MutipleCompositionAggregationononeclass_message")
-    private String no_MutipleCompositionAggregationononeclass_message;
 
 }
