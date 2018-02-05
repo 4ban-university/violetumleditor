@@ -41,7 +41,6 @@ import com.horstmann.violet.framework.injection.resources.annotation.ResourceBun
 import com.horstmann.violet.workspace.IWorkspace;
 import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
-import com.horstmann.violet.workspace.editorpart.behavior.CheckAssociationAndCompositionOnOneClassBehavior;
 import com.horstmann.violet.workspace.editorpart.behavior.UndoRedoCompoundBehavior;
 
 /**
