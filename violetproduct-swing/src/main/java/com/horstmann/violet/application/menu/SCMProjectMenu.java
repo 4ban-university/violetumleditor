@@ -93,7 +93,7 @@ public class SCMProjectMenu extends JMenu
             {
                 IWorkspace activeWorkspace = mainFrame.getActiveWorkspace();
                 IEditorPart activeEditor = activeWorkspace.getEditorPart();
-                activeEditor.setFeature2(Feature1Item.isSelected());
+                activeEditor.setFeature2(Feature2Item.isSelected());
             }
 
         });
