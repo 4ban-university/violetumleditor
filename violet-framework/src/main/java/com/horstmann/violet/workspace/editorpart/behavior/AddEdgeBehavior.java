@@ -251,14 +251,18 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
                                     }
                                 //}   
                             }}
+                    if(editorPart.isFeature2()) {
                     if(!startNode.equals(endNode))
-                    {if (graph.findEdge(key)!=null) {
+                        
+                    {   if(newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.AggregationEdge")
+                            ||newEdge.getClass().getName().equals("com.horstmann.violet.product.diagram.classes.edge.CompositionEdge")) {
+                        if (graph.findEdge(key)!=null) {
                         if(nodeIds.get("startNode").equals(endNode.getId()) && nodeIds.get("endNode").equals(startNode.getId())) {
                             this.dialogFactory.showWarningDialog(noBidirectional);
                             return false;
-                         }
+                        } }
                     }
-                    }
+                    }}
                     
                     
                 }
