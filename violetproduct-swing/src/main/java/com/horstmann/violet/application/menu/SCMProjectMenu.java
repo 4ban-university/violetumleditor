@@ -43,6 +43,12 @@ import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
 import com.horstmann.violet.workspace.editorpart.behavior.UndoRedoCompoundBehavior;
 
+import com.horstmann.violet.product.diagram.abstracts.node.INode;
+import com.horstmann.violet.product.diagram.abstracts.edge.IEdge;
+import java.util.ArrayList;
+import java.util.Collection;
+
+
 /**
  * Help menu
  * 
@@ -110,6 +116,22 @@ public class SCMProjectMenu extends JMenu
         });
         this.add(Feature3Item);
 
+        totalCBOItem.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+
+                Collection<INode> objects = mainFrame.getActiveWorkspace().getGraphFile().getGraph().getAllNodes();
+                Collection<IEdge> links = mainFrame.getActiveWorkspace().getGraphFile().getGraph().getAllEdges();
+                ArrayList<INode> objectsArray = new ArrayList<INode>(objects);
+                ArrayList<IEdge> linksArray = new ArrayList<IEdge>(links);
+                String result = "Objects: "+objectsArray.size()+"\nLinks: "+linksArray.size();
+                JOptionPane.showMessageDialog(null, result);
+            }
+
+        });
+        this.add(totalCBOItem);
+
     }
 
     private boolean isThereAnyWorkspaceDisplayed()
@@ -135,6 +157,9 @@ public class SCMProjectMenu extends JMenu
     
     @ResourceBundleBean(key = "SCMProject.Feature3")
     private JMenuItem Feature3Item;
+
+    @ResourceBundleBean(key = "SCMProject.totalCBO")
+    private JMenuItem totalCBOItem;
 
 
 
