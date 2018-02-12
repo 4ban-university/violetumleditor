@@ -23,7 +23,7 @@ package com.horstmann.violet.application.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+import java.util.*;
 import java.util.logging.ErrorManager;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -38,6 +38,7 @@ import com.horstmann.violet.application.help.HelpManager;
 import com.horstmann.violet.application.help.ShortcutDialog;
 import com.horstmann.violet.framework.injection.resources.ResourceBundleInjector;
 import com.horstmann.violet.framework.injection.resources.annotation.ResourceBundleBean;
+import com.horstmann.violet.product.diagram.classes.node.ClassNode;
 import com.horstmann.violet.workspace.IWorkspace;
 import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
@@ -45,8 +46,6 @@ import com.horstmann.violet.workspace.editorpart.behavior.UndoRedoCompoundBehavi
 
 import com.horstmann.violet.product.diagram.abstracts.node.INode;
 import com.horstmann.violet.product.diagram.abstracts.edge.IEdge;
-import java.util.ArrayList;
-import java.util.Collection;
 
 
 /**
@@ -109,28 +108,36 @@ public class SCMProjectMenu extends JMenu
         {
             public void actionPerformed(ActionEvent e)
             {
-                AboutDialog dialog = new AboutDialog(mainFrame);
-                dialog.setVisible(true);
-            }
-
-        });
-        this.add(Feature3Item);
-
-        totalCBOItem.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-
                 Collection<INode> objects = mainFrame.getActiveWorkspace().getGraphFile().getGraph().getAllNodes();
                 Collection<IEdge> links = mainFrame.getActiveWorkspace().getGraphFile().getGraph().getAllEdges();
-                ArrayList<INode> objectsArray = new ArrayList<INode>(objects);
-                ArrayList<IEdge> linksArray = new ArrayList<IEdge>(links);
-                String result = "Objects: "+objectsArray.size()+"\nLinks: "+linksArray.size();
+                ArrayList<INode> objectsArray = new ArrayList<>(objects);
+                ArrayList<IEdge> linksArray = new ArrayList<>(links);
+
+                Map<String, String> dict = new HashMap<>();
+                for(INode object : objects){
+                    ClassNode classNode = (ClassNode) object;
+                    dict.put(classNode.getName().toEdit(), "none");
+                }
+
+                String result = "<html>";
+                result+="<style>table, th,td { border: 1px solid black; border-collapse: collapse; }</style>";
+                result+="<p>Objects: "+objectsArray.size()+" ";
+                result+="Connections: "+linksArray.size()+"</p><hr><br>";
+                result+="<table><tr><th>Class</th><th>Connections</th></tr>";
+                Iterator it = dict.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry)it.next();
+                    //System.out.println(pair.getKey() + " = " + pair.getValue());
+                    result+="<tr><td>"+pair.getKey()+"</td><td>"+pair.getValue()+"</td></tr>";
+                    it.remove(); // avoids a ConcurrentModificationException
+                }
+                result+="</table>";
+                result+="</html>";
                 JOptionPane.showMessageDialog(null, result);
             }
 
         });
-        this.add(totalCBOItem);
+        this.add(Feature3Item);
 
     }
 
@@ -157,11 +164,6 @@ public class SCMProjectMenu extends JMenu
     
     @ResourceBundleBean(key = "SCMProject.Feature3")
     private JMenuItem Feature3Item;
-
-    @ResourceBundleBean(key = "SCMProject.totalCBO")
-    private JMenuItem totalCBOItem;
-
-
 
 
 }
