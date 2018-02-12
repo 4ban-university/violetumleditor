@@ -123,13 +123,12 @@ public class SCMProjectMenu extends JMenu
                 result+="<style>table, th,td { border: 1px solid black; border-collapse: collapse; }</style>";
                 result+="<p>Objects: "+objectsArray.size()+" ";
                 result+="Connections: "+linksArray.size()+"</p><hr><br>";
-                result+="<table><tr><th>Class</th><th>Connections</th></tr>";
+                result+="<table><tr><th>Names</th><th>Connections</th></tr>";
                 Iterator it = dict.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry)it.next();
-                    //System.out.println(pair.getKey() + " = " + pair.getValue());
                     result+="<tr><td>"+pair.getKey()+"</td><td>"+pair.getValue()+"</td></tr>";
-                    it.remove(); // avoids a ConcurrentModificationException
+                    it.remove();
                 }
                 result+="</table>";
                 result+="</html>";
