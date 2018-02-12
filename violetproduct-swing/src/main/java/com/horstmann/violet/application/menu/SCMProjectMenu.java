@@ -116,7 +116,7 @@ public class SCMProjectMenu extends JMenu
                 Map<String, String> dict = new HashMap<>();
                 for(INode object : objects){
                     ClassNode classNode = (ClassNode) object;
-                    dict.put(classNode.getName().toEdit(), "none");
+                    dict.put(classNode.getName().toEdit(), String.valueOf(classNode.getConnectedEdges().size()));
                 }
 
                 String result = "<html>";
