@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 public class SCMPFeature3Test {
 
     @Test
-    public void composeList() {
+    public void composeMap() {
         ClassNode node1 = new ClassNode();
         SingleLineText name1 = new SingleLineText();
         name1.setText("Node 1");
@@ -36,6 +36,7 @@ public class SCMPFeature3Test {
         DependencyEdge dependencyEdge3 = new DependencyEdge();
 
         ClassDiagramGraph classDiagramGraph = new ClassDiagramGraph();
+
         classDiagramGraph.addNode(node1, new Point2D.Double(100, 100));
         classDiagramGraph.addNode(node2, new Point2D.Double(100, 400));
         classDiagramGraph.addNode(node3, new Point2D.Double(400, 100));
@@ -45,8 +46,23 @@ public class SCMPFeature3Test {
         classDiagramGraph.connect(dependencyEdge2, node2, new Point2D.Double(100, 400), node3, new Point2D.Double(400, 100), new Point2D[]{});
         classDiagramGraph.connect(dependencyEdge3, node3, new Point2D.Double(400, 100), node2, new Point2D.Double(100, 400), new Point2D[]{});
 
-        String actual = SCMProjectMenu.composeList(classDiagramGraph);
+        String actual = SCMProjectMenu.composeMap(classDiagramGraph);
 
-        assertTrue(actual.contains("Node 1"));
+//        assertTrue(actual.contains("Node 2"));
+//        assertTrue(actual.contains("Node 1"));
+        String result = "<html>" +
+                "<style>table, th,td { border: 1px solid black; border-collapse: collapse; }</style>" +
+                "<p>Objects: 4 Connections: 3</p><" +
+                "hr><br>" +
+                "<table>" +
+                "<tr><th>Names</th><th>Connections</th></tr>" +
+                "<tr><td></td><td>0</td></tr>" +
+                "<tr><td>Node 3</td><td>2</td></tr>" +
+                "<tr><td>Node 2</td><td>3</td></tr>" +
+                "<tr><td>Node 1</td><td>1</td></tr>" +
+                "</table>" +
+                "</html>";
+        assertTrue(actual.equals(result));
+
     }
 }
