@@ -109,7 +109,7 @@ public class UMLEditorApplication
         createDefaultWorkspace(filesToOpen);
     }
     
-    private static void initBeanFactory() {
+    public static void initBeanFactory() {
         IUserPreferencesDao userPreferencesDao = new DefaultUserPreferencesDao();
         BeanFactory.getFactory().register(IUserPreferencesDao.class, userPreferencesDao);
 
