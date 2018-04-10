@@ -34,6 +34,7 @@ public class SCMPFeature1Test {
         ManiocFramework.BeanFactory.getFactory().getBean(UserPreferencesService.class);
 
         AddEdgeBehavior addEdge=new AddEdgeBehavior(editorPart, graphsToolBar);
+        AggregationEdge connection0=new AggregationEdge();
         AggregationEdge connection1=new AggregationEdge();
         AggregationEdge connection2=new AggregationEdge();
 
@@ -50,12 +51,16 @@ public class SCMPFeature1Test {
         graph.addNode(node1, new Point2D.Double(100, 100));
         graph.addNode(node2, new Point2D.Double(100, 400));
 
-        Point2D startLocation1=new Point2D.Double(100, 100);
-        Point2D endLocation1=new Point2D.Double(100,100);
+        Point2D startLocation0=new Point2D.Double(100, 100);
+        Point2D endLocation0=new Point2D.Double(110,110);
+
+        Point2D startLocation1=new Point2D.Double(120, 120);
+        Point2D endLocation1=new Point2D.Double(130,130);
 
         Point2D startLocation2=new Point2D.Double(100, 100);
         Point2D endLocation2=new Point2D.Double(100, 400);
 
+        addEdge.addEdgeAtPoints(connection0, startLocation0, endLocation0);
         editorPart.setFeature1(true);
 
         assertFalse(addEdge.addEdgeAtPoints(connection1, startLocation1, endLocation1));
